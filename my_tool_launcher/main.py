@@ -7,29 +7,31 @@ from PIL import Image, ImageTk, ImageSequence
 import requests  # Added for webhook
 
 # -------------------------- TOOL PATHS --------------------------
+# Get the directory where main.py is located
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 tool_paths = {
     "Tool 1": {
-        "path": "C:\\Users\\DRR8656\\Desktop\\my_tool_launcher\\tools\\GANG-Nuker\\GANG.py",
+        "path": os.path.join(BASE_DIR, "tools", "GANG-Nuker", "GANG.py"),
         "desc": "Powerful gang nuker script"
     },
     "Tool 2": {
-        "path": "C:\\Users\\DRR8656\\Desktop\\my_tool_launcher\\tools\\LithiumNukerV2-main\\LithiumNukerV2.exe",
+        "path": os.path.join(BASE_DIR, "tools", "LithiumNukerV2-main", "LithiumNukerV2.exe"),
         "desc": "Fast Lithium Nuker executable"
     },
     "Tool 3": {
-        "path": "tools\\tool3.py",
+        "path": os.path.join(BASE_DIR, "tools", "tool3.py"),
         "desc": "Utility tool number three"
     },
     "Tool 4": {
-        "path": "tools\\tool4.py",
+        "path": os.path.join(BASE_DIR, "tools", "tool4.py"),
         "desc": "Fourth tool with advanced features"
     },
     "Tool 5": {
-        "path": "tools\\tool5.py",
+        "path": os.path.join(BASE_DIR, "tools", "tool5.py"),
         "desc": "Fifth tool for special tasks"
     }
 }
-
 USER_DATA = {
     "root": "Ali_moh69",
     "Dark": "Dark973",
