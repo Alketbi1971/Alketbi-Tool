@@ -1,7 +1,8 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, simpledialog
 import subprocess
 import os
+import requests
 
 # -------------------------- TOOL PATHS --------------------------
 tool_paths = {
@@ -35,14 +36,18 @@ BTN_HOVER = "#005500"
 FONT = ("Courier New", 20, "bold")
 TITLE_FONT = ("Courier New", 26, "bold")
 
-# -------------------------- PASSWORD --------------------------
-PASSWORD = "your_password_here"  # Change this to your actual password
+# -------------------------- USER CREDENTIALS --------------------------
+# Define your users and passwords here
+USER_DATA = {
+    "Alketbi": "Ali_moh69",
+    "Dark": "Dark973",
+    # add more users here
+}
 
-# -------------------------- MAIN WINDOW --------------------------
-root = tk.Tk()
-root.title("Alketbi Hacker Launcher")
-root.geometry("800x600")
-root.config(bg=BG_COLOR)
+# Discord webhook URL (put your actual webhook URL here)
+DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1376274904252551219/XXY9OHEno6SkL_ntplsn_Cs1fzcg1OzGgEfMBPHiF_x_sEUw85CuZ79ljmqz-4OY0zaz"
+
+# -------------------------- FUNCTIONS --------------------------
 
 def run_tool(path):
     if not os.path.exists(path):
@@ -59,25 +64,61 @@ def clear_window():
     for widget in root.winfo_children():
         widget.destroy()
 
-def check_password():
-    entered = password_entry.get()
-    if entered == PASSWORD:
-        show_welcome_screen()
+def send_forgot_password_to_discord(username):
+    content = f"User requested password reset: **{username}**"
+    data = {"content": content}
+    try:
+        response = requests.post(DISCORD_WEBHOOK_URL, json=data)
+        response.raise_for_status()
+        return True
+    except Exception as e:
+        print("Failed to send webhook:", e)
+        return False
+
+def forgot_password():
+    username = simpledialog.askstring("Forgot Password", "Enter your username:")
+    if not username:
+        return
+    if username in USER_DATA:
+        success = send_forgot_password_to_discord(username)
+        if success:
+            messagebox.showinfo("Forgot Password", f"Your username '{username}' has been sent to support via Discord.")
+        else:
+            messagebox.showerror("Error", "Failed to notify support. Try again later.")
     else:
-        messagebox.showerror("Error", "Incorrect password, try again.")
+        messagebox.showerror("Error", "Username not found.")
+
+def check_credentials():
+    username = username_entry.get()
+    password = password_entry.get()
+
+    if USER_DATA.get(username) == password:
+        show_welcome_screen(username)
+    else:
+        messagebox.showerror("Login Failed", "Invalid username or password.")
         password_entry.delete(0, tk.END)
+
+# -------------------------- SCREENS --------------------------
 
 def show_login_screen():
     clear_window()
-    label = tk.Label(root, text="Enter Password", font=TITLE_FONT, fg=TEXT_COLOR, bg=BG_COLOR)
-    label.pack(pady=80)
+    label = tk.Label(root, text="Login to Alketbi Launcher", font=TITLE_FONT, fg=TEXT_COLOR, bg=BG_COLOR)
+    label.pack(pady=30)
 
-    global password_entry
-    password_entry = tk.Entry(root, show="*", font=FONT, width=30)
-    password_entry.pack(pady=10)
-    password_entry.focus()
+    global username_entry, password_entry
+    frame = tk.Frame(root, bg=BG_COLOR)
+    frame.pack(pady=10)
 
-    submit_btn = tk.Button(
+    tk.Label(frame, text="Username:", fg=TEXT_COLOR, bg=BG_COLOR, font=FONT).grid(row=0, column=0, sticky="e", padx=5, pady=5)
+    username_entry = tk.Entry(frame, font=FONT, width=20)
+    username_entry.grid(row=0, column=1, padx=5, pady=5)
+    username_entry.focus()
+
+    tk.Label(frame, text="Password:", fg=TEXT_COLOR, bg=BG_COLOR, font=FONT).grid(row=1, column=0, sticky="e", padx=5, pady=5)
+    password_entry = tk.Entry(frame, show="*", font=FONT, width=20)
+    password_entry.grid(row=1, column=1, padx=5, pady=5)
+
+    login_btn = tk.Button(
         root,
         text="Login",
         font=FONT,
@@ -87,13 +128,24 @@ def show_login_screen():
         width=20,
         height=2,
         borderwidth=0,
-        command=check_password
+        command=check_credentials
     )
-    submit_btn.pack(pady=20)
+    login_btn.pack(pady=10)
 
-def show_welcome_screen():
+    forgot_btn = tk.Button(
+        root,
+        text="Forgot Password?",
+        font=("Courier New", 12, "underline"),
+        fg=TEXT_COLOR,
+        bg=BG_COLOR,
+        borderwidth=0,
+        command=forgot_password
+    )
+    forgot_btn.pack()
+
+def show_welcome_screen(username):
     clear_window()
-    label = tk.Label(root, text="Hello Alketbi", font=TITLE_FONT, fg=TEXT_COLOR, bg=BG_COLOR)
+    label = tk.Label(root, text=f"Hello {username}", font=TITLE_FONT, fg=TEXT_COLOR, bg=BG_COLOR)
     label.pack(pady=100)
 
     start_btn = tk.Button(
@@ -165,5 +217,10 @@ def show_tool_menu():
     back_btn.pack(pady=20)
 
 # -------------------------- START --------------------------
+root = tk.Tk()
+root.title("Alketbi Hacker Launcher")
+root.geometry("800x600")
+root.config(bg=BG_COLOR)
+
 show_login_screen()
 root.mainloop()
