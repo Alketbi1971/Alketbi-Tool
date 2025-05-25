@@ -7,9 +7,10 @@ from PIL import Image, ImageTk, ImageSequence
 import requests  # Added for webhook
 
 # -------------------------- TOOL PATHS --------------------------
-# Get the directory where main.py is located
+# Base directory of the launcher (auto-detects current directory)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# -------------------------- TOOL PATHS --------------------------
 tool_paths = {
     "Tool 1": {
         "path": os.path.join(BASE_DIR, "tools", "GANG-Nuker", "GANG.py"),
