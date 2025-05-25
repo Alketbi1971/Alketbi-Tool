@@ -11,6 +11,8 @@ import requests  # Added for webhook
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # -------------------------- TOOL PATHS --------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 tool_paths = {
     "Tool 1": {
         "path": os.path.join(BASE_DIR, "tools", "GANG-Nuker", "GANG.py"),
