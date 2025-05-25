@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Calculator Tool",
+    "filename": "tool1.py",
+    "description": "Basic calculator script"
+  },
+  {
+    "name": "Image Resizer",
+    "filename": "tool2.py",
+    "description": "Resize images easily"
+  },
+  {
+    "name": "PDF Merger",
+    "filename": "tool3.py",
+    "description": "Merge multiple PDF files"
+  }
+]
