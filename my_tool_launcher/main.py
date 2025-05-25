@@ -1,8 +1,10 @@
 import tkinter as tk
-from tkinter import messagebox, simpledialog
+from tkinter import messagebox
 import subprocess
 import os
-import requests
+import random
+from PIL import Image, ImageTk, ImageSequence
+import requests  # Added for webhook
 
 # -------------------------- TOOL PATHS --------------------------
 tool_paths = {
@@ -28,7 +30,11 @@ tool_paths = {
     }
 }
 
-# -------------------------- STYLES --------------------------
+USER_DATA = {
+    "root": "Ali_moh69",
+    "Dark": "Dark973",
+}
+
 BG_COLOR = "#000000"
 TEXT_COLOR = "#00FF00"
 BTN_COLOR = "#003300"
@@ -36,18 +42,19 @@ BTN_HOVER = "#005500"
 FONT = ("Courier New", 20, "bold")
 TITLE_FONT = ("Courier New", 26, "bold")
 
-# -------------------------- USER CREDENTIALS --------------------------
-# Define your users and passwords here
-USER_DATA = {
-    "Alketbi": "Ali_moh69",
-    "Dark": "Dark973",
-    # add more users here
-}
+current_user = None
 
-# Discord webhook URL (put your actual webhook URL here)
-DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1376274904252551219/XXY9OHEno6SkL_ntplsn_Cs1fzcg1OzGgEfMBPHiF_x_sEUw85CuZ79ljmqz-4OY0zaz"
+root = tk.Tk()
+root.title("Alketbi Hacker Launcher")
 
-# -------------------------- FUNCTIONS --------------------------
+# Fullscreen mode
+root.attributes("-fullscreen", True)
+root.configure(bg=BG_COLOR)
+
+# GIF animation variables (not used, GIF removed)
+gif_frames = []
+gif_index = 0
+gif_label = None
 
 def run_tool(path):
     if not os.path.exists(path):
@@ -64,61 +71,60 @@ def clear_window():
     for widget in root.winfo_children():
         widget.destroy()
 
-def send_forgot_password_to_discord(username):
-    content = f"User requested password reset: **{username}**"
-    data = {"content": content}
-    try:
-        response = requests.post(DISCORD_WEBHOOK_URL, json=data)
-        response.raise_for_status()
-        return True
-    except Exception as e:
-        print("Failed to send webhook:", e)
-        return False
-
-def forgot_password():
-    username = simpledialog.askstring("Forgot Password", "Enter your username:")
-    if not username:
-        return
-    if username in USER_DATA:
-        success = send_forgot_password_to_discord(username)
-        if success:
-            messagebox.showinfo("Forgot Password", f"Your username '{username}' has been sent to support via Discord.")
-        else:
-            messagebox.showerror("Error", "Failed to notify support. Try again later.")
-    else:
-        messagebox.showerror("Error", "Username not found.")
-
 def check_credentials():
+    global current_user
     username = username_entry.get()
     password = password_entry.get()
 
     if USER_DATA.get(username) == password:
-        show_welcome_screen(username)
+        current_user = username
+        show_welcome_screen()
     else:
         messagebox.showerror("Login Failed", "Invalid username or password.")
         password_entry.delete(0, tk.END)
 
-# -------------------------- SCREENS --------------------------
+WEBHOOK_URL = "https://discord.com/api/webhooks/1376274904252551219/XXY9OHEno6SkL_ntplsn_Cs1fzcg1OzGgEfMBPHiF_x_sEUw85CuZ79ljmqz-4OY0zaz"
+
+def random_color():
+    return f'#{random.randint(0, 0xFFFFFF):06x}'
+
+def forgot_password():
+    username = username_entry.get()
+    if username.strip() == "":
+        messagebox.showinfo("Forgot Password", "Please enter your username first.")
+        return
+    
+    # Send a message to Discord webhook
+    data = {
+        "content": f"Password recovery requested for username: {username}"
+    }
+    try:
+        requests.post(WEBHOOK_URL, json=data)
+    except Exception as e:
+        print(f"Failed to send webhook: {e}")
+
+    messagebox.showinfo("Forgot Password", f"Password recovery info for '{username}' would be sent.")
 
 def show_login_screen():
     clear_window()
-    label = tk.Label(root, text="Login to Alketbi Launcher", font=TITLE_FONT, fg=TEXT_COLOR, bg=BG_COLOR)
-    label.pack(pady=30)
+    root.config(bg=BG_COLOR)
 
-    global username_entry, password_entry
-    frame = tk.Frame(root, bg=BG_COLOR)
-    frame.pack(pady=10)
+    label = tk.Label(root, text="Enter Username", font=TITLE_FONT, fg=TEXT_COLOR, bg=BG_COLOR)
+    label.pack(pady=20)
 
-    tk.Label(frame, text="Username:", fg=TEXT_COLOR, bg=BG_COLOR, font=FONT).grid(row=0, column=0, sticky="e", padx=5, pady=5)
-    username_entry = tk.Entry(frame, font=FONT, width=20)
-    username_entry.grid(row=0, column=1, padx=5, pady=5)
+    global username_entry
+    username_entry = tk.Entry(root, font=FONT, width=30)
+    username_entry.pack(pady=5)
     username_entry.focus()
 
-    tk.Label(frame, text="Password:", fg=TEXT_COLOR, bg=BG_COLOR, font=FONT).grid(row=1, column=0, sticky="e", padx=5, pady=5)
-    password_entry = tk.Entry(frame, show="*", font=FONT, width=20)
-    password_entry.grid(row=1, column=1, padx=5, pady=5)
+    label2 = tk.Label(root, text="Enter Password", font=TITLE_FONT, fg=TEXT_COLOR, bg=BG_COLOR)
+    label2.pack(pady=20)
 
-    login_btn = tk.Button(
+    global password_entry
+    password_entry = tk.Entry(root, show="*", font=FONT, width=30)
+    password_entry.pack(pady=5)
+
+    submit_btn = tk.Button(
         root,
         text="Login",
         font=FONT,
@@ -130,52 +136,75 @@ def show_login_screen():
         borderwidth=0,
         command=check_credentials
     )
-    login_btn.pack(pady=10)
+    submit_btn.pack(pady=10)
 
     forgot_btn = tk.Button(
         root,
         text="Forgot Password?",
-        font=("Courier New", 12, "underline"),
-        fg=TEXT_COLOR,
+        font=("Courier New", 14, "underline"),
+        fg="#00FFFF",
         bg=BG_COLOR,
         borderwidth=0,
+        cursor="hand2",
         command=forgot_password
     )
     forgot_btn.pack()
 
-def show_welcome_screen(username):
+def show_welcome_screen():
     clear_window()
-    label = tk.Label(root, text=f"Hello {username}", font=TITLE_FONT, fg=TEXT_COLOR, bg=BG_COLOR)
-    label.pack(pady=100)
+    root.config(bg=BG_COLOR)
+
+    # Simple welcome screen with text label only (no GIF)
+    text_label = tk.Label(root, text="1337 Team", font=("Courier New", 48, "bold"), bg=BG_COLOR)
+    text_label.place(relx=0.5, rely=0.3, anchor="center")
+
+    def change_color():
+        text_label.config(fg=random_color())
+        root.after(500, change_color)
+    change_color()
 
     start_btn = tk.Button(
         root,
         text=">> START <<",
         font=FONT,
-        fg=TEXT_COLOR,
-        bg=BTN_COLOR,
-        activebackground=BTN_HOVER,
+        fg="#FFFFFF",
+        bg="#222222",
+        activebackground="#555555",
         width=20,
         height=2,
         borderwidth=0,
         command=show_tool_menu
     )
-    start_btn.pack()
+    start_btn.place(relx=0.5, rely=0.5, anchor="center")
 
 def show_tool_menu():
     clear_window()
-    title = tk.Label(root, text="🛠 TOOL MENU 🛠", font=TITLE_FONT, fg=TEXT_COLOR, bg=BG_COLOR)
-    title.pack(pady=20)
+    root.config(bg=BG_COLOR)
 
-    frame = tk.Frame(root, bg=BG_COLOR)
-    frame.pack()
+    title = tk.Label(root, text="🛠 TOOL MENU 🛠", font=TITLE_FONT, fg=TEXT_COLOR, bg=BG_COLOR)
+    title.pack(pady=10)
+
+    canvas = tk.Canvas(root, bg=BG_COLOR, highlightthickness=0)
+    scrollbar = tk.Scrollbar(root, orient="vertical", command=canvas.yview)
+    scrollable_frame = tk.Frame(canvas, bg=BG_COLOR)
+
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
 
     for idx, tool_name in enumerate(tool_paths):
         tool_info = tool_paths[tool_name]
         path = tool_info["path"]
         desc = tool_info["desc"]
 
-        tool_frame = tk.Frame(frame, bg=BG_COLOR, pady=10)
+        tool_frame = tk.Frame(scrollable_frame, bg=BG_COLOR, pady=10)
         tool_frame.grid(row=idx, column=0, padx=20, pady=10, sticky="w")
 
         btn = tk.Button(
@@ -214,13 +243,12 @@ def show_tool_menu():
         height=1,
         command=show_welcome_screen
     )
-    back_btn.pack(pady=20)
+    back_btn.pack(pady=10)
 
-# -------------------------- START --------------------------
-root = tk.Tk()
-root.title("Alketbi Hacker Launcher")
-root.geometry("800x600")
-root.config(bg=BG_COLOR)
+def exit_fullscreen(event=None):
+    root.attributes("-fullscreen", False)
+
+root.bind("<Escape>", exit_fullscreen)
 
 show_login_screen()
 root.mainloop()
